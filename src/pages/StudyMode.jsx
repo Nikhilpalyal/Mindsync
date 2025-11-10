@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import './studyMode.css'
+import VideoLearning from '../components/VideoLearning'
 
 export default function StudyMode() {
   const [showPasteModal, setShowPasteModal] = useState(false)
@@ -9,6 +10,7 @@ export default function StudyMode() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [pasteUrl, setPasteUrl] = useState('')
   const [pasteText, setPasteText] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const fileInputRef = useRef(null)
   const sidebarRef = useRef(null)
 
@@ -27,7 +29,18 @@ export default function StudyMode() {
   const handlePasteSubmit = () => {
     if (pasteUrl || pasteText) {
       console.log('Paste submitted:', { url: pasteUrl, text: pasteText })
-      // Handle paste logic here
+      
+      // Check if it's a YouTube URL
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/
+      if (pasteUrl && youtubeRegex.test(pasteUrl)) {
+        setVideoUrl(pasteUrl)
+        setShowPasteModal(false)
+        setPasteUrl('')
+        setPasteText('')
+        return
+      }
+      
+      // Handle other paste logic here
       setPasteUrl('')
       setPasteText('')
       setShowPasteModal(false)
@@ -67,6 +80,10 @@ export default function StudyMode() {
     setIsSidebarOpen(false)
   }
 
+  const handleBackFromVideo = () => {
+    setVideoUrl('')
+  }
+
   // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,6 +107,11 @@ export default function StudyMode() {
       document.body.style.overflow = ''
     }
   }, [isSidebarOpen])
+
+  // If video URL is set, show the VideoLearning component
+  if (videoUrl) {
+    return <VideoLearning videoUrl={videoUrl} onBack={handleBackFromVideo} />
+  }
 
   return (
     <div className="study-mode-page">
